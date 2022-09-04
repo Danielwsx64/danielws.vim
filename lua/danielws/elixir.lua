@@ -32,6 +32,30 @@ local function ripgrep(file_path)
 	return io.popen("rg --files | rg  " .. file_path):read("l")
 end
 
+function Self.module_name_by_path(file_name)
+	local file = file_name or vim.fn.expand("%")
+
+	if file and file ~= "" then
+		local cut_at = string.find(file, "/lib/")
+			or string.find(file, "test/")
+			or string.find(file, "[%a_-]+.?e?x?s?$") - 5
+
+		local mod_name = file
+			:sub(cut_at + 5)
+			:gsub(".ex$", "")
+			:gsub(".exs$", "")
+			:gsub("/", ".")
+			:gsub("(%l)(%w*)", function(a, b)
+				return string.upper(a) .. b
+			end)
+			:gsub("_", "")
+
+		return mod_name
+	end
+
+	return "Module"
+end
+
 function Self.go_to_test()
 	local line = vim.fn.search("^.*defmodule", "bcn")
 
