@@ -1,4 +1,8 @@
+local vim = vim or {}
+
 local elixir = require("danielws.elixir")
+local search = require("danielws.search")
+local substitute = require("danielws.substitute")
 
 local danielws = {}
 
@@ -18,7 +22,9 @@ function danielws.setup(options)
 
 	-- do here any startup your plugin needs, like creating commands and
 	-- mappings that depend on values passed in options
-	vim.api.nvim_create_user_command("MyAwesomePluginGreet", danielws.greet, {})
+	vim.api.nvim_create_user_command("DWSBetterSearch", search.better_search, {})
+	vim.api.nvim_create_user_command("DWSBetterReplace", substitute.better_replace, {})
+	vim.api.nvim_create_user_command("DWSGoToTest", elixir.go_to_test, {})
 end
 
 function danielws.is_configured()
