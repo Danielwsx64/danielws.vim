@@ -1,4 +1,3 @@
-local vim = vim or {}
 local vim_utils = require("danielws.utils.vim")
 
 local Self = {}

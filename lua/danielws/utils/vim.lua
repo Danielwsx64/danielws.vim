@@ -1,4 +1,3 @@
-local vim = vim or {}
 local Self = {}
 
 function Self.get_marked_region(mark1, mark2, options)

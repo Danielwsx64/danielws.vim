@@ -1,5 +1,3 @@
-local vim = vim or {}
-
 local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local conf = require("telescope.config").values

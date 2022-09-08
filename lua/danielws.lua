@@ -1,5 +1,3 @@
-local vim = vim or {}
-
 local elixir = require("danielws.elixir")
 local search = require("danielws.search")
 local substitute = require("danielws.substitute")
