@@ -6,15 +6,14 @@ function Self.better_replace()
 	local global_search = "%s"
 	local command = ""
 
-	if vim_utils.is_visual_mode() then
-		local _, start, finish = vim_utils.get_marked_region("v", ".", {})
+	local selected_search, start, finish = vim_utils.get_visual_selection({ join_with = "\n" })
 
+	if selected_search then
 		if start[1] == finish[1] then
 			command = string.format(
 				vim.api.nvim_replace_termcodes(":<C-u>%s/%s//cg<Left><Left><Left>", true, false, true),
-
 				global_search,
-				vim_utils.get_visual_selection()
+				selected_search
 			)
 		else
 			command = vim.api.nvim_replace_termcodes(":s///cg<Left><Left><Left>", true, false, true)

@@ -23,6 +23,7 @@ function danielws.setup(options)
 	vim.api.nvim_create_user_command("DWSBetterSearch", search.better_search, {})
 	vim.api.nvim_create_user_command("DWSBetterReplace", substitute.better_replace, {})
 	vim.api.nvim_create_user_command("DWSGoToTest", elixir.go_to_test, {})
+	vim.api.nvim_create_user_command("DWSElixirPipelize", elixir.pipelize, {})
 end
 
 function danielws.is_configured()

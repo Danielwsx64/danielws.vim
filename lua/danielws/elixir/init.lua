@@ -1,6 +1,8 @@
 local notify = require("danielws.utils.notify")
 local file = require("danielws.utils.file")
 local input = require("danielws.utils.input")
+local vim_utils = require("danielws.utils.vim")
+local pipelize = require("danielws.elixir.pipelize")
 
 local Self = { name = "elixir", _current_win = nil }
 
@@ -143,6 +145,25 @@ function Self.go_to_test()
 
 		prompt_create_new_test_file(test_path)
 	end
+end
+
+function Self.pipelize()
+	local lines, start, finish, mode = vim_utils.get_visual_selection()
+
+	-- print(vim.inspect(start))
+	-- print(vim.inspect(finish))
+	-- print(vim.inspect(lines))
+
+	local result = pipelize.into_pipe(lines)
+	-- print(result)
+
+	if mode == "V" then
+		vim.api.nvim_buf_set_lines(0, start[1] - 1, finish[1], false, { result })
+		return
+	end
+
+	-- print(vim.inspect(region))
+	vim.api.nvim_buf_set_text(0, start[1] - 1, start[2] - 1, finish[1] - 1, finish[2], { result })
 end
 
 return Self
