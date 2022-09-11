@@ -150,19 +150,19 @@ end
 function Self.pipelize()
 	local lines, start, finish, mode = vim_utils.get_visual_selection()
 
-	-- print(vim.inspect(start))
-	-- print(vim.inspect(finish))
-	-- print(vim.inspect(lines))
+	local success, result = pcall(pipelize.into_pipe, lines)
 
-	local result = pipelize.into_pipe(lines)
-	-- print(result)
+	if not success then
+		notify.err(string.format("Fail to pipelize:\n %s", vim.inspect(result)), Self)
+
+		return
+	end
 
 	if mode == "V" then
 		vim.api.nvim_buf_set_lines(0, start[1] - 1, finish[1], false, { result })
 		return
 	end
 
-	-- print(vim.inspect(region))
 	vim.api.nvim_buf_set_text(0, start[1] - 1, start[2] - 1, finish[1] - 1, finish[2], { result })
 end
 

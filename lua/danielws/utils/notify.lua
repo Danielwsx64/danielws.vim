@@ -21,7 +21,7 @@ function Self.warn(message, mod)
 	})
 end
 
-function Self.error(message, mod)
+function Self.err(message, mod)
 	vim.notify(message, "error", {
 		title = build_title(mod),
 	})

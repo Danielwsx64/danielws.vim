@@ -6,7 +6,7 @@ function Self.create(path)
 	local ok, file = pcall(vim.loop.fs_open, path, "w", 420)
 
 	if not ok or file == nil then
-		notify.error("Couldn't create file " .. path, Self)
+		notify.err("Couldn't create file " .. path, Self)
 
 		return false
 	end

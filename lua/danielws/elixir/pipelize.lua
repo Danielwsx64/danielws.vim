@@ -1,7 +1,7 @@
 local Self = {}
 
 local function trim(str)
-	local result, _ = str:gsub("\n", ""):gsub("^%s*", ""):gsub("%s*$", "")
+	local result, _ = str:gsub("\n", ""):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s%s+", " ")
 
 	return result
 end
@@ -10,33 +10,37 @@ local function get_first_arg_when_is_collection(args)
 	local open_char = string.match(args, "^%s*%%?[%.%w]*([{%[])")
 
 	local closes_regex = {
-		["{"] = "^(%s*%%?[%.%w]*{.*}),?(.*)",
-		["["] = "^(%s*%[.*%]),?(.*)",
+		["{"] = "^(%s*%%?[%.%w]*{.*}),(.*)",
+		["["] = "^(%s*%[.*%]),(.*)",
 	}
 
 	local first_arg, rest = string.match(args, closes_regex[open_char])
+
+	if not first_arg then
+		return args, ""
+	end
 
 	return trim(first_arg), rest and trim(rest) or nil
 end
 
 local function get_first_arg_when_is_var(args)
-	local first_arg, rest = string.match(args, "^%s*(%a+[_%w]*),?(.*)")
+	local first_arg, rest = string.match(args, "^%s*(%a+[_%w%.]*),?(.*)")
 
 	return trim(first_arg), rest and trim(rest) or nil
 end
 
 local function get_first_arg_when_is_fn(args)
-	local fn_call, rest = string.match(args, "^%s*(%a+[_%w]*%(.*%)),?(.*)")
+	local fn_call, rest = string.match(args, "^%s*(%a+[_%w%.]*%(.*%)),?(.*)")
 
 	return trim(fn_call), rest and trim(rest) or nil
 end
 
 local function is_first_arg_a_var(args)
-	return not (string.find(args, "^%s*[%a]+[_%w]*,?") == nil)
+	return not (string.find(args, "^%s*[%a]+[_%w%.]*,?") == nil)
 end
 
 local function is_first_arg_a_fn(args)
-	return not (string.find(args, "^%s*%a+[_%w]*%(.*,?") == nil)
+	return not (string.find(args, "^%s*%a+[_%w%.]*%(.*,?") == nil)
 end
 
 local function split_assigning_statement(line)
@@ -50,7 +54,7 @@ local function split_assigning_statement(line)
 end
 
 local function pipelize(fn_call)
-	local fn_name, args = string.match(fn_call, "^([%w_]+)%((.*)%)")
+	local fn_name, args = string.match(fn_call, "^([%w_%.]+)%((.*)%)")
 
 	if args == "" then
 		return string.format("%s()", fn_name)
@@ -74,24 +78,21 @@ local function pipelize(fn_call)
 end
 
 function Self.into_pipe(line)
-	-- print(line)
 	local assign_statement, fn_call = split_assigning_statement(trim(line))
 
-	-- print("-------------")
-	-- print(trim(fn_call))
-	-- print("-------------")
 	return assign_statement .. pipelize(fn_call)
 end
 
 -- Used for test
-local function test(value, expected)
-	if value ~= expected then
-		print(string.format("Test failed\n\nExpected:\n%s\n\nGot:\n%s\n\n", expected, value))
-		return false
-	end
-
-	return true
-end
+-- local function test(value, expected)
+-- 	if value ~= expected then
+-- 		print(string.format("Test failed\n\nExpected:\n%s\n\nGot:\n%s\n\n", expected, value))
+-- 		return false
+-- 	end
+--
+-- 	return true
+-- end
+--
 -- local primeira = "funcao(valor_one, valor_two)"
 -- local segunda = "variavel = funcao(valor_one, valor_two)"
 -- local terceira = "\nvariavel \n= \nfuncao(valor_one, valor_two)"
@@ -105,14 +106,15 @@ end
 -- local onza = "funcao([1, 2], build())"
 -- local doza = "funcao([1, %{daniel: valor}], build())"
 -- local treza = "funcao({:ok,  %{ list: [1, [ 2, 3]] }, map: %{ key: value} }, build())"
--- local quator = "    um_complexo =\n      print(%{\n        key: value\n      })"
-
 -- local quator = [[
 --     um_complexo =
 --       print(%{
 --         key: value
 --       })
 -- ]]
+-- local quinze = "valor = mais_um(%{map: value}, {:ok, [1, 2]})"
+-- local dezeis = "company = Organization.get_company(connection.company_id)"
+--
 -- assert(test(Self.into_pipe(primeira), "valor_one |> funcao(valor_two)"))
 -- assert(test(Self.into_pipe(segunda), "variavel = valor_one |> funcao(valor_two)"))
 -- assert(test(Self.into_pipe(terceira), "variavel = valor_one |> funcao(valor_two)"))
@@ -125,8 +127,11 @@ end
 -- assert(test(Self.into_pipe(deca), '%Elixir.Struct{"daniel" => "valor", outra: [1, 2]} |> funcao(build())'))
 -- assert(test(Self.into_pipe(onza), "[1, 2] |> funcao(build())"))
 -- assert(test(Self.into_pipe(doza), "[1, %{daniel: valor}] |> funcao(build())"))
--- assert(test(Self.into_pipe(treza), "{:ok,  %{ list: [1, [ 2, 3]] }, map: %{ key: value} } |> funcao(build())"))
--- assert(test(Self.into_pipe(quator), ""))
+-- assert(test(Self.into_pipe(treza), "{:ok, %{ list: [1, [ 2, 3]] }, map: %{ key: value} } |> funcao(build())"))
+-- assert(test(Self.into_pipe(quator), "um_complexo = %{ key: value } |> print()"))
+-- assert(test(Self.into_pipe(quinze), "valor = %{map: value} |> mais_um({:ok, [1, 2]})"))
+-- assert(test(Self.into_pipe(dezeis), "company = connection.company_id |> Organization.get_company()"))
 --
 -- print("Sucesso !!")
+
 return Self

@@ -43,8 +43,6 @@ function Self.co_authors(opts)
 	end
 
 	if next(results) == nil then
-		print("No authors found")
-
 		utils.notify("danielws.co_authors", {
 			msg = "No authors found",
 			level = "WARN",
