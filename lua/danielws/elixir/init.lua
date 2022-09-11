@@ -4,7 +4,7 @@ local input = require("danielws.utils.input")
 local vim_utils = require("danielws.utils.vim")
 local pipelize = require("danielws.elixir.pipelize")
 
-local Self = { name = "elixir", _current_win = nil }
+local Self = { _name = "elixir", _icon = "", _current_win = nil }
 
 local function is_test_file(file_path)
 	local suffix = "test"

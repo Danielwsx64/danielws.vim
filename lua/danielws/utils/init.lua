@@ -1,4 +1,4 @@
-local Self = { name = "utils" }
+local Self = { _name = "utils" }
 
 function Self.trim(txt)
 	return txt:gsub("^%s*", ""):gsub("%s*$", "")

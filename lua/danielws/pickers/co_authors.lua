@@ -4,9 +4,9 @@ local conf = require("telescope.config").values
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
 local themes = require("telescope.themes")
-local utils = require("telescope.utils")
+local notify = require("danielws.utils.notify")
 
-local Self = {}
+local Self = { _name = "CoAuthors", _icon = "" }
 
 local function apply_co_authors(selection)
 	local co_authors = {}
@@ -43,10 +43,7 @@ function Self.co_authors(opts)
 	end
 
 	if next(results) == nil then
-		utils.notify("danielws.co_authors", {
-			msg = "No authors found",
-			level = "WARN",
-		})
+		notify.warn("No authors found", Self)
 
 		return
 	end

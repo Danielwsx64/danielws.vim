@@ -1,6 +1,6 @@
 local notify = require("danielws.utils.notify")
 
-local Self = { name = "utils.file" }
+local Self = { _name = "utils.file", _icon = "" }
 
 function Self.create(path)
 	local ok, file = pcall(vim.loop.fs_open, path, "w", 420)
