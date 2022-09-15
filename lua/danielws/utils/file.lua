@@ -22,17 +22,44 @@ local function remove_namespace(path)
 	return result
 end
 
-function Self.find(search)
-	-- TODO: use async fn
-	return io.popen("rg --files | rg  " .. search):read("l")
+function Self.find_file(search)
+	local result = io.popen("rg --files | rg  " .. search):read("l")
+	return result
 end
 
-function Self.recursive_find_and_edit(search_path)
+function Self.find(search)
+	local result = io.popen("rg -l " .. search):read("l")
+	return result
+end
+
+function Self.find_and_edit(search)
+	local found = Self.find(search)
+
+	if found then
+		vim.cmd("edit " .. found)
+		return true
+	end
+
+	return false
+end
+
+function Self.find_file_and_edit(search_path)
+	local found = Self.find_file(search_path)
+
+	if found then
+		vim.cmd("edit " .. found)
+		return true
+	end
+
+	return false
+end
+
+function Self.recursive_find_file_and_edit(search_path)
 	local current_search = search_path
 	local should_retry = true
 
 	repeat
-		local found = Self.find(current_search)
+		local found = Self.find_file(current_search)
 
 		if found then
 			vim.cmd("edit " .. found)

@@ -6,24 +6,28 @@ local pipelize = require("danielws.elixir.pipelize")
 
 local Self = { _name = "elixir", _icon = "", _current_win = nil }
 
-local function is_test_file(file_path)
-	local suffix = "test"
+local function is_test_module(file_path)
+	local suffix = "Test"
 
 	return string.sub(file_path, -string.len(suffix)) == suffix
 end
 
-local function discover_path_by_defmodule()
+local function get_module_name_and_path()
 	local line = vim.fn.search("^.*defmodule", "bcn")
 
-	local path = nil
-	local isModule = line ~= 0
-
-	if isModule then
+	if line ~= 0 then
 		local line_content = vim.api.nvim_buf_get_lines(0, line - 1, -1, false)
-		path = Self.path_by_module_name(line_content[1]:gsub("defmodule", ""):gsub(" do", ""):gsub(" ", ""))
+		local module_name = string.match(line_content[1], "^%s*defmodule%s*([%w%.]+)%s*do")
+		local path = Self.path_by_module_name(module_name)
+
+		return module_name, path
 	end
 
-	return path, isModule
+	return nil
+end
+
+local function add_defmodule(module_name)
+	return string.format("'defmodule %s do'", module_name)
 end
 
 local function discover_correct_path_for_new_test(file_path)
@@ -33,7 +37,7 @@ local function discover_correct_path_for_new_test(file_path)
 	local file_prefix = "test/" .. namespace_root:gsub("_test$", "")
 
 	-- Must add / in search to avoid results as "test/remove_namespace_API/.."
-	local ref = file.find(file_prefix .. "/")
+	local ref = file.find_file(file_prefix .. "/")
 
 	if ref then
 		local _, _, ref_path_prefix = string.find(ref, string.format("^(.*)%s", file_prefix))
@@ -45,8 +49,6 @@ end
 
 local function create_and_edit(path)
 	if file.create(path) then
-		-- path = path:gsub("^" .. vim.fn.getcwd() .. "/", "")
-
 		if Self._current_win then
 			vim.api.nvim_set_current_win(Self._current_win)
 		end
@@ -118,32 +120,28 @@ end
 function Self.go_to_test()
 	Self._current_win = vim.api.nvim_get_current_win()
 
-	local path, isModule = discover_path_by_defmodule()
+	local module_name, module_path = get_module_name_and_path()
 
-	if not isModule then
+	if not module_name then
 		notify.warn("Current file isn't a module file", Self)
 
 		return
 	end
 
-	if is_test_file(path) then
-		local implementation_path = path:gsub("_test$", "") .. ".ex"
-
-		local result = file.recursive_find_and_edit(implementation_path)
-
-		if not result then
-			notify.warn(string.format("Couldn't find: [%s]", implementation_path), Self)
+	if is_test_module(module_name) then
+		if not file.find_and_edit(add_defmodule(module_name:gsub("Test$", ""))) then
+			notify.warn(string.format("Couldn't find: [%s]", module_name), Self)
 		end
 
 		return
 	end
 
-	local test_path = path .. "_test.exs"
+	local test_module = string.format("%sTest", module_name)
 
-	if not file.recursive_find_and_edit(test_path) then
-		notify.debug(string.format("Couldn't find a test file: [%s]", test_path), Self)
+	if not file.find_and_edit(add_defmodule(test_module)) then
+		notify.debug(string.format("Couldn't find a test module: [%s]", test_module), Self)
 
-		prompt_create_new_test_file(test_path)
+		prompt_create_new_test_file(string.format("%s_test.exs", module_path))
 	end
 end
 
