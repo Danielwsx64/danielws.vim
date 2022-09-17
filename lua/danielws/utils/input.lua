@@ -84,4 +84,13 @@ function Self.popup_prompt(title, opts)
 	vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<ESC>A", true, false, true), "n", false)
 end
 
+function Self.input(msg)
+	vim.cmd("echohl String")
+	local result = vim.fn.input(msg)
+
+	vim.cmd("echohl None")
+	vim.cmd("redraw")
+	return result
+end
+
 return Self

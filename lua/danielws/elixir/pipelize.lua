@@ -1,5 +1,6 @@
 local Self = {}
 
+-- TODO: use vim.trim
 local function trim(str)
 	local result, _ = str:gsub("\n", ""):gsub("^%s*", ""):gsub("%s*$", ""):gsub("%s%s+", " ")
 
