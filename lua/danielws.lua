@@ -1,5 +1,6 @@
 local elixir = require("danielws.elixir")
 local search = require("danielws.search")
+local exit = require("danielws.exit")
 local substitute = require("danielws.substitute")
 
 local danielws = {}
@@ -24,6 +25,7 @@ function danielws.setup(options)
 	vim.api.nvim_create_user_command("DWSBetterReplace", substitute.better_replace, {})
 	vim.api.nvim_create_user_command("DWSGoToTest", elixir.go_to_test, {})
 	vim.api.nvim_create_user_command("DWSElixirPipelize", elixir.pipelize, {})
+	vim.api.nvim_create_user_command("DWSQuitAll", exit.quit_all, {})
 end
 
 function danielws.is_configured()

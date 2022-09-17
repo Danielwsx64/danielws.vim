@@ -2,9 +2,9 @@ local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local conf = require("telescope.config").values
 local finders = require("telescope.finders")
+local notify = require("danielws.utils.notify")
 local pickers = require("telescope.pickers")
 local themes = require("telescope.themes")
-local notify = require("danielws.utils.notify")
 
 local Self = { _name = "CoAuthors", _icon = "" }
 
