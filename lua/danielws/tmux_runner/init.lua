@@ -5,14 +5,24 @@ local notify = require("danielws.utils.notify")
 
 local Self = { _name = tmux._name, _icon = tmux._icon }
 
-local _config = { display_pane_numbers = true, auto_attach = false }
+local _config = {
+	display_pane_numbers = true,
+	auto_attach = false,
+	try_reattach_before_run = true,
+	auto_split = {
+		orientation = "h",
+	},
+}
 
+-- TODO: preciso mesmo desse controlle?
 local _current = { first_attach_already_happened = false }
 
 local function set_config(o)
 	_config = {
 		display_pane_numbers = o.display_pane_numbers or _config.display_pane_numbers,
 		auto_attach = o.auto_attach or _config.auto_attach,
+		try_reattach_before_run = o.try_reattach_before_run or _config.try_reattach_before_run,
+		auto_split = o.auto_split ~= nil and o.auto_split or _config.auto_split,
 	}
 end
 
@@ -40,22 +50,45 @@ function Self.setup(opts)
 end
 
 function Self.send_command(command, panel_number)
-	tmux.run_shell(command, panel_number)
+	if panel_number then
+		return tmux.run_shell(command, panel_number)
+	end
+
+	if tmux.is_attached() then
+		return tmux.run_shell(command)
+	end
+
+	local panes_count = tmux.panes_count()
+
+	if panes_count == 1 and _config.auto_split then
+		tmux.split(_config.auto_split.orientation)
+
+		if tmux.set_pane(tmux.alt_pane()) then
+			return tmux.run_shell(command)
+		end
+	end
+
+	if panes_count >= 2 and _config.try_reattach_before_run then
+		if Self.prompt_attach_to_pane() then
+			return tmux.run_shell(command)
+		end
+	end
+
+	notify.err("Run aborted because there is no panel attached", Self)
+	return false
 end
 
-function Self.prompt_attach_to_pane(pane)
-	local pane_number = tonumber(pane)
-
-	if pane_number then
-		return tmux.set_pane(pane_number)
+function Self.prompt_attach_to_pane(target_pane)
+	if target_pane and target_pane ~= "" then
+		return tmux.set_pane(target_pane)
 	end
 
 	local pane_count = tmux.panes_count()
 
 	if pane_count == 1 then
-		notify.warn("No pane to attach", Self)
+		notify.warn("No pane available to attach", Self)
 
-		return
+		return false
 	end
 
 	if pane_count == 2 then
@@ -66,15 +99,15 @@ function Self.prompt_attach_to_pane(pane)
 		tmux.display_panes()
 	end
 
-	local selected_pane = tonumber(input.input("Attach to wich pane? #"))
+	local selected_pane = input.input("Attach to wich pane? #")
 
 	if not selected_pane then
 		notify.warn("No pane specified. Cancelling.", Self)
 
-		return
+		return false
 	end
 
-	tmux.set_pane(selected_pane)
+	return tmux.set_pane(selected_pane)
 end
 
 return Self
