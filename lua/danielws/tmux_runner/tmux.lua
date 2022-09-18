@@ -4,8 +4,7 @@ local notify = require("danielws.utils.notify")
 local Self = { _name = "tmux_runner", _icon = "" }
 
 local current = {
-	pane = nil,
-	major_orientation = nil,
+	attached_pane = nil,
 	vim_pane_id = nil,
 }
 
@@ -99,9 +98,9 @@ local function current_major_orientation()
 	local layout = get_info({ "window_layout" })
 
 	if string.match(layout, "[[{]") == "{" then
-		return "vertical"
+		return "v"
 	else
-		return "horizontal"
+		return "h"
 	end
 end
 
@@ -120,6 +119,18 @@ local function quit_copy_mode(pane_number)
 	end
 end
 
+local function set_vim_pane_id(id)
+	current.vim_pane_id = id
+end
+
+local function set_attached_pane(pane)
+	current.attached_pane = pane
+end
+
+local function get_vim_pane_id()
+	return current.vim_pane_id
+end
+
 function Self.panes_count()
 	return tonumber(get_info({ "window_panes" }))
 end
@@ -130,7 +141,7 @@ function Self.split(orientation)
 	elseif orientation == "v" then
 		run_command("splitw -v")
 	else
-		run_command("splitw")
+		Self.split(current_major_orientation())
 	end
 
 	return true
@@ -144,8 +155,7 @@ function Self.set_pane(pane)
 	local available_pane, pane_info = is_pane_available_for_run(pane)
 
 	if available_pane and pane_info ~= nil then
-		current.pane = pane_info
-		current.major_orientation = current_major_orientation()
+		set_attached_pane(pane_info)
 
 		notify.info(string.format("Attached to pane #%s id: %s", pane_info.number, pane_info.id), Self)
 		return true
@@ -164,7 +174,7 @@ function Self.alt_pane()
 end
 
 function Self.run_shell(command, pane_number)
-	local run_into_pane = pane_number or Self.current_pane()
+	local run_into_pane = pane_number or Self.get_attached_pane()
 	local available_pane, pane_info = is_pane_available_for_run(run_into_pane)
 
 	if not available_pane or pane_info == nil then
@@ -177,20 +187,30 @@ function Self.run_shell(command, pane_number)
 	return true
 end
 
-function Self.current_pane()
-	return current.pane
+function Self.get_attached_pane()
+	return current.attached_pane
 end
 
 function Self.is_attached()
-	local pane_available = is_pane_available_for_run(Self.current_pane())
+	local pane_available = is_pane_available_for_run(Self.get_attached_pane())
 
 	return pane_available
 end
 
+function Self.resize_vim_pane(value)
+	value = tonumber(value)
+
+	if value then
+		run_command(string.format("resize-pane -y%s%% -x%s%%", value, value), get_vim_pane_id())
+
+		return true
+	end
+	return false
+end
+
 function Self.initialize()
-	current.pane = nil
-	current.vim_pane_id = get_info({ "pane_id" })
-	current.major_orientation = nil
+	set_attached_pane(nil)
+	set_vim_pane_id(get_info({ "pane_id" }))
 end
 
 return Self
