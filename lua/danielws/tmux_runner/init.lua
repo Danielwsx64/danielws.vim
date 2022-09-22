@@ -61,7 +61,7 @@ function Self.send_command(command, panel_number)
 	local panes_count = tmux.panes_count()
 
 	if panes_count == 1 and _config.auto_split then
-		tmux.split(_config.auto_split.orientation)
+		Self.split(_config.auto_split.orientation)
 
 		if tmux.set_pane(tmux.alt_pane()) then
 			return tmux.run_shell(command)
@@ -109,5 +109,24 @@ function Self.prompt_attach_to_pane(target_pane)
 
 	return tmux.set_pane(selected_pane)
 end
+
+function Self.new_window()
+	tmux.run_command("new-window")
+end
+
+function Self.next_window()
+	tmux.run_command("next-window")
+end
+
+function Self.previous_window()
+	tmux.run_command("previous-window")
+end
+
+function Self.last_window()
+	tmux.run_command("last-window")
+end
+
+Self.resize_vim_pane = tmux.resize_vim_pane
+Self.split = tmux.split
 
 return Self

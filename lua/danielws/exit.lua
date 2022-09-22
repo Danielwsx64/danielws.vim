@@ -2,10 +2,11 @@ local notify = require("danielws.utils.notify")
 
 local Self = { _name = "Exit", _icon = "" }
 
-local function close_if_needed(buf_info)
-	if buf_info.listed == 0 or not (vim.api.nvim_buf_get_option(buf_info.bufnr, "modifiable")) then
-		vim.api.nvim_buf_delete(buf_info.bufnr, {})
-	end
+local function close_if_needed(_)
+	return true
+	-- if buf_info.listed == 0 or not (vim.api.nvim_buf_get_option(buf_info.bufnr, "modifiable")) then
+	-- 	vim.api.nvim_buf_delete(buf_info.bufnr, {})
+	-- end
 end
 
 function Self.close_session()

@@ -1,7 +1,6 @@
 local elixir = require("danielws.elixir")
 local exit = require("danielws.exit")
 local notify = require("danielws.utils.notify")
-local tmux = require("danielws.tmux_runner.tmux")
 local search = require("danielws.search")
 local substitute = require("danielws.substitute")
 local tmux_runner = require("danielws.tmux_runner")
@@ -21,15 +20,21 @@ local _commands = {
 	["better_replace"] = substitute.better_replace,
 	["elixir"] = {
 		["go_to_test"] = elixir.go_to_test,
-		["pipelize"] = elixir.go_to_test,
+		["pipelize"] = elixir.pipelize,
 	},
-	["tmux"] = { ["resize_vim_pane"] = tmux.resize_vim_pane },
+	["tmux"] = {
+		["resize_vim_pane"] = tmux_runner.resize_vim_pane,
+		["last_window"] = tmux_runner.last_window,
+		["new_window"] = tmux_runner.new_window,
+		["next_window"] = tmux_runner.next_window,
+		["window_split"] = tmux_runner.split,
+		["previous_window"] = tmux_runner.previous_window,
+	},
 	["quit_all"] = exit.quit_all,
 }
 
 -- This function is supposed to be called explicitly by users to configure this
 -- plugin
--- tmux
 function Self.setup(options)
 	-- avoid setting global values outside of this function. Global state
 	-- mutations are hard to debug and test, so having them in a single

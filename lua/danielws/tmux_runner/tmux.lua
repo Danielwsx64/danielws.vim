@@ -8,7 +8,7 @@ local current = {
 	vim_pane_id = nil,
 }
 
-local function run_command(command, target_pane)
+function Self.run_command(command, target_pane)
 	local line = string.format("tmux %s", command)
 
 	if target_pane then
@@ -39,7 +39,7 @@ local function get_info(messages, target_pane)
 
 	local display_message = string.format("display-message -p -F '%s'", full_message)
 
-	return run_command(display_message, target_pane)()
+	return Self.run_command(display_message, target_pane)()
 end
 
 local function bool_info(message, target)
@@ -49,7 +49,7 @@ end
 local function get_panes()
 	local panes = {}
 
-	local list = run_command("list-panes")
+	local list = Self.run_command("list-panes")
 
 	for line in list do
 		local number = string.match(line, "(%d+):")
@@ -137,9 +137,9 @@ end
 
 function Self.split(orientation)
 	if orientation == "h" then
-		run_command("splitw -h")
+		Self.run_command("splitw -h")
 	elseif orientation == "v" then
-		run_command("splitw -v")
+		Self.run_command("splitw -v")
 	else
 		Self.split(current_major_orientation())
 	end
@@ -148,7 +148,7 @@ function Self.split(orientation)
 end
 
 function Self.display_panes()
-	run_command("display-panes")
+	Self.run_command("display-panes")
 end
 
 function Self.set_pane(pane)
@@ -198,13 +198,20 @@ function Self.is_attached()
 end
 
 function Self.resize_vim_pane(value)
-	value = tonumber(value)
-
-	if value then
-		run_command(string.format("resize-pane -y%s%% -x%s%%", value, value), get_vim_pane_id())
+	if value == "z" or value == "Z" then
+		Self.run_command("resize-pane -Z", get_vim_pane_id())
 
 		return true
 	end
+
+	value = tonumber(value)
+
+	if value then
+		Self.run_command(string.format("resize-pane -y%s%% -x%s%%", value, value), get_vim_pane_id())
+
+		return true
+	end
+
 	return false
 end
 
