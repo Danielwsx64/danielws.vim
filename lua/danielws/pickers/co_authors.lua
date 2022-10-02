@@ -1,10 +1,11 @@
+local Job = require("plenary.job")
 local action_state = require("telescope.actions.state")
 local actions = require("telescope.actions")
 local conf = require("telescope.config").values
 local finders = require("telescope.finders")
 local notify = require("danielws.utils.notify")
 local pickers = require("telescope.pickers")
-local themes = require("telescope.themes")
+local pickers_config = require("danielws.pickers.config")
 
 local Self = { _name = "CoAuthors", _icon = "" }
 
@@ -32,12 +33,14 @@ local function attach_mappings(prompt_bufnr, _)
 end
 
 function Self.co_authors(opts)
-	opts = themes.get_ivy(opts or {})
+	opts = pickers_config.get_opts(opts)
 
 	local results = {}
-	local output = io.popen("git shortlog -sen")
+	local git_command = Job:new({ command = "git", args = { "shortlog", "-s", "-e", "-n", "--all" } })
 
-	for line in output:lines() do
+	git_command:sync()
+
+	for _, line in ipairs(git_command:result()) do
 		local author, _ = line:gsub("^.*\t", "")
 		table.insert(results, author)
 	end
