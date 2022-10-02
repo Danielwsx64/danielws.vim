@@ -3,7 +3,7 @@ local actions = require("telescope.actions")
 local conf = require("telescope.config").values
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
-local themes = require("telescope.themes")
+local pickers_config = require("danielws.pickers.config")
 
 local tmux_runner = require("danielws.tmux_runner")
 
@@ -41,7 +41,7 @@ local function run_from_prompt(prompt_bufnr)
 end
 
 function Self.history(opts)
-	opts = themes.get_ivy(opts or {})
+	opts = pickers_config.get_opts(opts)
 
 	pickers.new(opts, {
 		prompt_title = "Shell commands",
