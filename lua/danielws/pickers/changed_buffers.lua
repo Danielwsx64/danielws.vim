@@ -4,13 +4,15 @@ local conf = require("telescope.config").values
 local entry_display = require("telescope.pickers.entry_display")
 local finders = require("telescope.finders")
 local pickers = require("telescope.pickers")
+local pickers_config = require("danielws.pickers.config")
 local previewers = require("telescope.previewers")
 local utils = require("telescope.utils")
 
 local Self = {}
 
 function Self.changed_buffers(opts)
-	opts = opts or {}
+	opts = pickers_config.get_opts(opts)
+
 	local buffers = {}
 
 	for _, buf_info in ipairs(vim.fn.getbufinfo()) do
@@ -29,7 +31,7 @@ function Self.changed_buffers(opts)
 	end
 
 	local displayer = entry_display.create({
-		separator = " ",
+		separator = " | ",
 		items = {
 			{ width = 4 },
 			{ width = 4 },

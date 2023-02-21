@@ -2,7 +2,16 @@ local notify = require("danielws.utils.notify")
 
 local Self = { _name = "utils.file", _icon = "" }
 
-function Self.create(path)
+local function file_exists(path)
+	local _, error = vim.loop.fs_stat(path)
+	return error == nil
+end
+
+local function is_folder(path)
+	return string.match(path, "/$") and true or false
+end
+
+local function create_file(path)
 	local ok, file = pcall(vim.loop.fs_open, path, "w", 420)
 
 	if not ok or file == nil then
@@ -15,6 +24,34 @@ function Self.create(path)
 
 	notify.info("Created " .. path, Self)
 	return true
+end
+
+local function create_folder(path)
+	local success = vim.loop.fs_mkdir(path, 493)
+
+	if not success then
+		notify.err("Couldn't create folder " .. path, Self)
+
+		return false
+	end
+
+	return true
+end
+
+function Self.create(path)
+	local current_path = ""
+
+	for value in string.gmatch(path, "[^/]+/?") do
+		current_path = current_path .. value
+
+		if not is_folder(current_path) then
+			return create_file(current_path)
+		end
+
+		if not file_exists(current_path) then
+			return create_folder(current_path)
+		end
+	end
 end
 
 local function remove_namespace(path)
