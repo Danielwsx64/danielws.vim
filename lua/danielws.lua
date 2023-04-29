@@ -4,6 +4,7 @@ local notify = require("danielws.utils.notify")
 local search = require("danielws.search")
 local substitute = require("danielws.substitute")
 local tmux_runner = require("danielws.tmux_runner")
+local ag = require("danielws.pickers.ag")
 
 local Self = { _icon = "" }
 
@@ -31,6 +32,7 @@ local _commands = {
 		["previous_window"] = tmux_runner.previous_window,
 	},
 	["quit_all"] = exit.quit_all,
+	["ag"] = ag.search,
 }
 
 -- This function is supposed to be called explicitly by users to configure this
