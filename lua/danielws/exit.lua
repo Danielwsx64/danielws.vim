@@ -3,6 +3,7 @@ local notify = require("danielws.utils.notify")
 
 local Self = { _name = "Exit", _icon = "" }
 
+-- TODO: we dont use this anymore, let just remove
 function Self.close_session()
 	vim.cmd("DeleteSession")
 	vim.cmd("qa!")

@@ -10,6 +10,7 @@ local utils = require("telescope.utils")
 
 local Self = {}
 
+-- TODO: this is not working properly
 function Self.changed_buffers(opts)
 	opts = pickers_config.get_opts(opts)
 
