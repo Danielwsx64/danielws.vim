@@ -23,24 +23,26 @@ function Self.ag_pick(opts)
 
 	local displayer = Self.displayer()
 
-	pickers.new(picker_opts, {
-		prompt_title = "Ag result:",
-		finder = finders.new_table({
-			results = results,
-			entry_maker = function(entry)
-				return {
-					value = entry,
-					ordinal = entry.path .. " " .. entry.content,
-					display = Self.make_display_fn(displayer),
-					filename = entry.path,
-					path = vim.loop.fs_realpath(entry.path),
-					lnum = entry.line_number,
-				}
-			end,
-		}),
-		previewer = conf.grep_previewer(picker_opts),
-		sorter = conf.file_sorter(picker_opts),
-	}):find()
+	pickers
+		.new(picker_opts, {
+			prompt_title = "Ag result:",
+			finder = finders.new_table({
+				results = results,
+				entry_maker = function(entry)
+					return {
+						value = entry,
+						ordinal = entry.path .. " " .. entry.content,
+						display = Self.make_display_fn(displayer),
+						filename = entry.path,
+						path = vim.loop.fs_realpath(entry.path),
+						lnum = entry.line_number,
+					}
+				end,
+			}),
+			previewer = conf.grep_previewer(picker_opts),
+			sorter = conf.file_sorter(picker_opts),
+		})
+		:find()
 end
 
 function Self.silver_search(search)
@@ -55,7 +57,7 @@ function Self.silver_search(search)
 		local entry = {
 			path = line_components[1],
 			line_number = tonumber(line_components[2]),
-			content = table.concat({ unpack(line_components, 3) }, ":"),
+			content = table.concat({ unpack(line_components, 3, 8) }, ":"),
 			path_length = string.len(line_components[1]),
 		}
 
