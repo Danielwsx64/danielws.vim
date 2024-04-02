@@ -22,11 +22,6 @@ local function send_keys(keys, target_pane)
 	io.popen(string.format("tmux send-keys -t%s %s", target_pane, keys))
 end
 
-local function run_shell_command(command, target_pane)
-	send_keys("C-c", target_pane)
-	send_keys(strings.shell_escape(command) .. " Enter", target_pane)
-end
-
 local function get_info(messages, target_pane)
 	local full_message = ""
 
@@ -114,12 +109,6 @@ local function is_in_copy_mode(pane_number)
 	return bool_info("pane_in_mode", target)
 end
 
-local function quit_copy_mode(pane_number)
-	while is_in_copy_mode(pane_number) do
-		send_keys("-X cancel", pane_number)
-	end
-end
-
 local function set_vim_pane_id(id)
 	current.vim_pane_id = id
 end
@@ -183,8 +172,16 @@ function Self.run_shell(command, pane_number)
 		return false
 	end
 
-	quit_copy_mode(pane_info.id)
-	run_shell_command(command, pane_info.id)
+	if is_in_copy_mode(pane_info.id) then
+		-- quit copy mode
+		send_keys("-X cancel", pane_info.id)
+	else
+		-- cancel any previous shell command in pane
+		send_keys("C-c", pane_info.id)
+	end
+
+	send_keys(strings.shell_escape(command) .. " Enter", pane_info.id)
+
 	return true
 end
 
