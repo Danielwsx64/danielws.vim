@@ -9,9 +9,3 @@ if vim.g.loaded_danielws == 1 then
 end
 
 vim.g.loaded_danielws = 1
-
--- create any global command that does not depend on user setup
--- usually it is better to define most commands/mappings in the setup function
--- Be careful to not overuse this file!
--- local danielws = require("danielws")
--- vim.api.nvim_create_user_command("MyAwesomePluginGenericGreet", danielws.generic_greet, {})

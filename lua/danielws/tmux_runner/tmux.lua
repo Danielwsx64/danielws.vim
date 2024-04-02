@@ -23,6 +23,7 @@ local function send_keys(keys, target_pane)
 end
 
 local function run_shell_command(command, target_pane)
+	send_keys("C-c", target_pane)
 	send_keys(strings.shell_escape(command) .. " Enter", target_pane)
 end
 
@@ -114,8 +115,8 @@ local function is_in_copy_mode(pane_number)
 end
 
 local function quit_copy_mode(pane_number)
-	if is_in_copy_mode(pane_number) then
-		send_keys("q", pane_number)
+	while is_in_copy_mode(pane_number) do
+		send_keys("-X cancel", pane_number)
 	end
 end
 
