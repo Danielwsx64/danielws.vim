@@ -110,6 +110,12 @@ function Self.module_name_by_path(file_name)
 				return string.upper(a) .. b
 			end)
 			:gsub("_", "")
+			:gsub("Api", "API")
+			:gsub("Json", "JSON")
+			:gsub(".Controllers", "")
+			:gsub(".Views", "")
+
+		print(vim.inspect(mod_name))
 
 		return mod_name
 	end
